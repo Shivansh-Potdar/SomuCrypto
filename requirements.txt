@@ -5,4 +5,4 @@ numpy==1.21.5
 scikit-learn==0.24.2
 keras==2.7.0
 matplotlib==3.5.1
-
+Werkzeug==2.2.2
