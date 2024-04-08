@@ -8,5 +8,5 @@ matplotlib==3.5.1
 Werkzeug==2.2.2
 tensorboard==2.14
 tensorboard-data-server==0.7.2
-tensorflow==2.14
+tensorflow==2.13
 tensorflow-io-gcs-filesystem==0.36.0
