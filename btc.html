@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph from API</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: black;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        /* Loading spinner styles */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            animation: spin 1s linear infinite;
+            position: relative;
+            margin: 0 auto;
+            margin-top: 50px; /* Adjust this value to center the spinner vertically */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide the loading spinner when data is loaded */
+        #loading.loaded {
+            display: none;
+        }
+
+        /* Input form styles */
+#input-form {
+    margin-top: 20px;
+    text-align: center;
+    border: 2px solid #007ACC; /* VS Code blue border */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#input-form input[type="number"] {
+    width: 80px;
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+#input-form button {
+    padding: 8px 16px;
+    background-color: #007ACC;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#input-form button:hover {
+    background-color: #005A9C;
+}
+
+
+    </style>
+</head>
+<body>
+    <div id="loading" class="spinner">
+    </div>
+    <canvas id="myChart"></canvas>
+
+    <center>
+        <form id="input-form">
+            Day (1-30): <input type="number" id="x-input" step="1" required>
+            Price: <input type="number" id="y-input" step="1" required>
+            <button type="submit">Submit</button>
+        </form>
+    </center>
+    
+
+    <div>
+        <h2 id="score"></h2>
+    </div>
+
+    <script>
+        // Function to calculate the difference between user-entered point and point on the graph at the same x value
+        function calculateDifference(userPoint, graphData) {
+            // Find the index of the user-entered x-value in the graph data labels
+            const userXIndex = graphData.labels.indexOf(userPoint.x);
+            
+            // If the user entered x-value is not found in the graph data, return null
+            if (userXIndex === -1) {
+                console.error('User entered x-value not found in graph data.');
+                return null;
+            }
+            
+            // Get the y-value of the graph data at the same x-value
+            const graphYValue = graphData.datasets[0].data[userXIndex];
+
+            // Calculate the difference between user-entered y-value and graph y-value
+            const difference = Math.round(100-(Math.abs((userPoint.y - graphYValue)/graphYValue)*100));
+
+            return difference;
+        }
+
+
+        // Function to fetch data from the API
+        async function fetchData() {
+            try {
+                const response = await fetch('https://somucrypto.onrender.com/pred/btc');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Function to create and render the graph
+        async function renderGraph(userPoint) {
+            const data = await fetchData();
+            
+            // Extracting data for x-axis and y-axis from the API response
+            const labels = Array.from({ length: data.length }, (_, i) => i + 1); // Array of labels for x-axis
+            const values = data; // Array of values for y-axis
+
+            // Remove loading message
+            const loadingDiv = document.getElementById('loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+
+            // Creating a new Chart instance
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            // Prepare datasets
+            const datasets = [{
+                label: 'Data from API',
+                data: values,
+                borderColor: '#007ACC', // VS Code blue
+                backgroundColor: 'rgba(0, 122, 204, 0.2)', // Lighter shade of VS Code blue
+                borderWidth: 1
+            }];
+
+            // Add user point if provided
+            if (userPoint) {
+                datasets.push({
+                    label: 'User Point',
+                    data: [userPoint],
+                    pointBackgroundColor: 'orange', // Change color for user point
+                    pointRadius: 5
+                });
+            }
+
+                // Calculate difference
+                const difference = calculateDifference(userPoint, { labels: labels, datasets: datasets });
+                // Display difference in the div
+                const differenceDiv = document.getElementById('score');
+                if (differenceDiv) {
+                    differenceDiv.innerText = `Accuracy: ${difference}%`;
+                }
+
+
+
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontColor: 'white'
+                            },
+                            gridLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontColor: 'white',
+                                beginAtZero: true
+                            },
+                            gridLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Call the function to render the graph with a user-inputted point (optional)
+        document.getElementById('input-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            const xInput = document.getElementById('x-input').valueAsNumber;
+            const yInput = document.getElementById('y-input').valueAsNumber;
+            const userPoint = { x: xInput, y: yInput };
+            renderGraph(userPoint); // Render graph with user input point
+        });
+
+    </script>
+
+    
+</body>
+</html>

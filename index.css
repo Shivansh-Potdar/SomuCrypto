@@ -1,0 +1,28 @@
+
+body {
+    font-size: 16px;
+    background-color: black;
+    color: #007acc; /* Visual Studio Code blue color */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font typically used in VS Code */
+}
+
+h1 {
+    text-align: center;
+}
+
+/* Style for the list */
+#links {
+    display: flex;
+    justify-content: space-around; /* Adjust spacing between boxes */
+}
+/* Style for each list item */
+#links ul li {
+    border: 1px solid #007acc; /* Border style */
+    padding: 10px; /* Adjust padding as needed */
+    list-style: none; /* Remove default list style */
+}
+/* Style for links */
+#links ul li a {
+    text-decoration: none; /* Remove underline */
+    color: white; /* Set link color to white */
+}
