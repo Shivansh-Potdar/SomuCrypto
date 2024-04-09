@@ -11,9 +11,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-import keras
-from keras.models import Sequential, save_model, load_model
-from keras.layers import LSTM, Dropout, Dense
+
+from keras.models import load_model
 
 import matplotlib.pyplot as plt
 
